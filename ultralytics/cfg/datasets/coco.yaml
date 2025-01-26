@@ -99,6 +99,7 @@ names:
 download: |
  from ultralytics.utils.downloads import download
  from pathlib import Path
+ import os
 
  # Download labels
  segments = True  # segment or box labels
@@ -109,11 +110,11 @@ download: |
 
  # Download val2017 images
  urls = ['http://images.cocodataset.org/zips/val2017.zip']
- download(urls, dir=dir / 'images', threads=1)
+ download(urls, dir=dir, unzip=True)
 
- # Create val2017.txt with image paths
- images_dir = dir / 'images' / 'val2017'
- image_paths = [f'images/val2017/{f.name}\n' for f in images_dir.glob('*.jpg')]
+ # Create val2017.txt with FULL image paths
+ images_dir = dir / 'val2017'
+ image_paths = [str(images_dir / f) + '\n' for f in os.listdir(images_dir) if f.endswith('.jpg')]
  
  with open(dir / 'val2017.txt', 'w') as f:
      f.writelines(image_paths)

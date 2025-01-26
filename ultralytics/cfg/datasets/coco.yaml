@@ -121,16 +121,26 @@ download: |
  with open(dir / 'annotations' / 'instances_val2017.json', 'r') as f:
      coco_data = json.load(f)
 
+ # Create category mapping
+ category_map = {cat['id']: idx for idx, cat in enumerate(coco_data['categories'])}
+
  # Create YOLO format labels
  for img in coco_data['images']:
      img_id = img['id']
      img_filename = img['file_name']
      width, height = img['width'], img['height']
      
-     # Find annotations for this image
      label_content = []
      for ann in coco_data['annotations']:
          if ann['image_id'] == img_id:
+             # Get category index using the mapping
+             category_id = ann['category_id']
+             if category_id not in category_map:
+                 print(f"Skipping annotation with unknown category ID: {category_id}")
+                 continue
+             
+             category_index = category_map[category_id]
+             
              # Convert COCO bbox to YOLO format
              x, y, w, h = ann['bbox']
              x_center = (x + w / 2) / width
@@ -138,9 +148,7 @@ download: |
              bbox_width = w / width
              bbox_height = h / height
              
-             # COCO category_id is 1-indexed, so subtract 1
-             category_id = ann['category_id'] - 1
-             label_content.append(f"{category_id} {x_center} {y_center} {bbox_width} {bbox_height}\n")
+             label_content.append(f"{category_index} {x_center} {y_center} {bbox_width} {bbox_height}\n")
      
      # Write label file
      if label_content:

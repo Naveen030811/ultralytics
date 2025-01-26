@@ -99,6 +99,7 @@ names:
 download: |
   from ultralytics.utils.downloads import download
   from pathlib import Path
+  import os
 
   dir = Path(yaml['path'])  # dataset root dir
   

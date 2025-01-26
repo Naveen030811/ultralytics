@@ -9,10 +9,9 @@
 #     └── coco  ← downloads here (20.1 GB)
 
 # Train/val/test sets as 1) dir: path/to/imgs, 2) file: path/to/imgs.txt, or 3) list: [path/to/imgs1, path/to/imgs2, ..]
-path: ../datasets/coco # dataset root dir
-train: train2017_tiny.txt # train images (relative to 'path') 118287 images
-val: val2017_tiny.txt # val images (relative to 'path') 5000 images
-test: test-dev2017.txt # 20288 of 40670 images, submit to https://competitions.codalab.org/competitions/20794
+path: ../datasets/coco
+train: val2017.txt  # Use val images as training data
+val: val2017.txt 
 
 # Classes
 names:
@@ -97,28 +96,12 @@ names:
   78: hair drier
   79: toothbrush
 
-
 download: |
   from ultralytics.utils.downloads import download
   from pathlib import Path
-  import random
 
-  dir = Path(yaml['path'])
+  dir = Path(yaml['path'])  # dataset root dir
   
-  # Download full dataset
-  urls = ['http://images.cocodataset.org/zips/train2017.zip',
-          'http://images.cocodataset.org/zips/val2017.zip']
-  download(urls, dir=dir / 'images', threads=2)
-
-  # Create extremely small subset
-  def create_tiny_subset(full_txt, tiny_txt, max_images=500):
-      with open(full_txt, 'r') as f:
-          all_images = f.readlines()
-      
-      tiny_images = random.sample(all_images, min(max_images, len(all_images)))
-      
-      with open(tiny_txt, 'w') as f:
-          f.writelines(tiny_images)
-
-  create_tiny_subset('train2017.txt', 'train2017_tiny.txt', max_images=500)
-  create_tiny_subset('val2017.txt', 'val2017_tiny.txt', max_images=50)
+  # Download only val2017 dataset
+  urls = ['http://images.cocodataset.org/zips/val2017.zip']  # 1G, 5k images
+  download(urls, dir=dir / 'images', threads=1)

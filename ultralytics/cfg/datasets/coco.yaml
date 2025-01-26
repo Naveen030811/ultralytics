@@ -97,24 +97,23 @@ names:
   79: toothbrush
 
 download: |
-  from ultralytics.utils.downloads import download
-  from pathlib import Path
+ from ultralytics.utils.downloads import download
+ from pathlib import Path
 
-  dir = Path(yaml['path'])  # dataset root dir
-  
-  # Download images
-  download('http://images.cocodataset.org/zips/val2017.zip', 
-            dir=dir / 'images', 
-            unzip=True)
-  
-  # Download labels
-  download('https://github.com/ultralytics/assets/releases/download/v0.0.0/coco2017labels-segments.zip',
-            dir=dir,
-            unzip=True)
-  
-  # Create val2017.txt with absolute image paths
-  images_dir = dir / 'images' / 'val2017'
-  image_paths = [str(images_dir / f.name) + '\n' for f in images_dir.glob('*.jpg')]
-  
-  with open(dir / 'val2017.txt', 'w') as f:
-      f.writelines(image_paths)
+ # Download labels
+ segments = True  # segment or box labels
+ dir = Path(yaml['path'])  # dataset root dir
+ url = 'https://github.com/ultralytics/assets/releases/download/v0.0.0/'
+ urls = [url + ('coco2017labels-segments.zip' if segments else 'coco2017labels.zip')]  # labels
+ download(urls, dir=dir)
+
+ # Download val2017 images
+ urls = ['http://images.cocodataset.org/zips/val2017.zip']
+ download(urls, dir=dir / 'images', threads=1)
+
+ # Create val2017.txt with image paths
+ images_dir = dir / 'images' / 'val2017'
+ image_paths = [f'images/val2017/{f.name}\n' for f in images_dir.glob('*.jpg')]
+ 
+ with open(dir / 'val2017.txt', 'w') as f:
+     f.writelines(image_paths)

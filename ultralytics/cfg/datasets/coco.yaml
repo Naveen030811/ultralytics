@@ -97,19 +97,29 @@ names:
   78: hair drier
   79: toothbrush
 
-# Download script/URL (optional)
+
 download: |
   from ultralytics.utils.downloads import download
   from pathlib import Path
+  import random
 
-  # Download labels
-  segments = True  # segment or box labels
-  dir = Path(yaml['path'])  # dataset root dir
-  url = 'https://github.com/ultralytics/assets/releases/download/v0.0.0/'
-  urls = [url + ('coco2017labels-segments.zip' if segments else 'coco2017labels.zip')]  # labels
-  download(urls, dir=dir.parent)
-  # Download data
-  urls = ['http://images.cocodataset.org/zips/train2017.zip',  # 19G, 118k images
-          'http://images.cocodataset.org/zips/val2017.zip',  # 1G, 5k images
-          'http://images.cocodataset.org/zips/test2017.zip']  # 7G, 41k images (optional)
-  download(urls, dir=dir / 'images', threads=3)
+  dir = Path(yaml['path'])
+  
+  # Download full dataset
+  urls = ['http://images.cocodataset.org/zips/train2017.zip',
+          'http://images.cocodataset.org/zips/val2017.zip']
+  download(urls, dir=dir / 'images', threads=2)
+
+  # Create subset text files
+  def create_subset(full_txt, subset_txt, max_images=10000):
+      with open(full_txt, 'r') as f:
+          all_images = f.readlines()
+      
+      subset_images = random.sample(all_images, min(max_images, len(all_images)))
+      
+      with open(subset_txt, 'w') as f:
+          f.writelines(subset_images)
+
+  create_subset('train2017.txt', 'train2017_subset.txt')
+  create_subset('val2017.txt', 'val2017_subset.txt')
+  

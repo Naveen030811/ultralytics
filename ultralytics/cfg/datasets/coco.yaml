@@ -97,19 +97,24 @@ names:
   79: toothbrush
 
 download: |
- from ultralytics.utils.downloads import download
- from pathlib import Path
+  from ultralytics.utils.downloads import download
+  from pathlib import Path
 
- dir = Path(yaml['path'])  # dataset root dir
- 
- # Download only val2017 dataset
- download('http://images.cocodataset.org/zips/val2017.zip', 
-           dir=dir / 'images', 
-           unzip=True)
- 
- # Create val2017.txt with ABSOLUTE paths
- images_dir = dir / 'images' / 'val2017'
- image_paths = [str(images_dir / f.name) + '\n' for f in images_dir.glob('*.jpg')]
- 
- with open(dir / 'val2017.txt', 'w') as f:
-     f.writelines(image_paths)
+  dir = Path(yaml['path'])  # dataset root dir
+  
+  # Download images
+  download('http://images.cocodataset.org/zips/val2017.zip', 
+            dir=dir / 'images', 
+            unzip=True)
+  
+  # Download labels
+  download('https://github.com/ultralytics/assets/releases/download/v0.0.0/coco2017labels-segments.zip',
+            dir=dir,
+            unzip=True)
+  
+  # Create val2017.txt with absolute image paths
+  images_dir = dir / 'images' / 'val2017'
+  image_paths = [str(images_dir / f.name) + '\n' for f in images_dir.glob('*.jpg')]
+  
+  with open(dir / 'val2017.txt', 'w') as f:
+      f.writelines(image_paths)

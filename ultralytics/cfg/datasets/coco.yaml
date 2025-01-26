@@ -149,7 +149,64 @@ download: |
              f.writelines(label_content)
 
  # Create val2017.txt with image paths
+ image_dir = dir / 'images' / 'val2017'download: |
+ from ultralytics.utils.downloads import download
+ from pathlib import Path
+ import json
+ import os
+
+ # Download labels
+ segments = True  # segment or box labels
+ dir = Path(yaml['path'])  # dataset root dir
+ url = 'https://github.com/ultralytics/assets/releases/download/v0.0.0/'
+ urls = [url + ('coco2017labels-segments.zip' if segments else 'coco2017labels.zip')]  # labels
+ download(urls, dir=dir)
+
+ # Download val2017 images and annotations
+ download('http://images.cocodataset.org/zips/val2017.zip', dir=dir / 'images', unzip=True)
+ download('http://images.cocodataset.org/annotations/annotations_trainval2017.zip', dir=dir, unzip=True)
+
+ # Prepare labels directory
+ labels_dir = dir / 'labels' / 'val2017'
+ labels_dir.mkdir(parents=True, exist_ok=True)
+
+ # Load COCO annotations
+ with open(dir / 'annotations' / 'instances_val2017.json', 'r') as f:
+     coco_data = json.load(f)
+
+ # Create YOLO format labels
+ for img in coco_data['images']:
+     img_id = img['id']
+     img_filename = img['file_name']
+     width, height = img['width'], img['height']
+     
+     # Find annotations for this image
+     label_content = []
+     for ann in coco_data['annotations']:
+         if ann['image_id'] == img_id:
+             # Convert COCO bbox to YOLO format
+             x, y, w, h = ann['bbox']
+             x_center = (x + w / 2) / width
+             y_center = (y + h / 2) / height
+             bbox_width = w / width
+             bbox_height = h / height
+             
+             # COCO category_id is 1-indexed, so subtract 1
+             category_id = ann['category_id'] - 1
+             label_content.append(f"{category_id} {x_center} {y_center} {bbox_width} {bbox_height}\n")
+     
+     # Write label file
+     if label_content:
+         label_path = labels_dir / f"{img_filename.replace('.jpg', '.txt')}"
+         with open(label_path, 'w') as f:
+             f.writelines(label_content)
+
+ # Create val2017.txt with image paths
  image_dir = dir / 'images' / 'val2017'
+ image_paths = [f'/kaggle/working/datasets/coco/images/val2017/{f}\n' for f in os.listdir(image_dir) if f.endswith('.jpg')]
+ 
+ with open(dir / 'val2017.txt', 'w') as f:
+     f.writelines(image_paths)
  image_paths = [f'/kaggle/working/datasets/coco/images/val2017/{f}\n' for f in os.listdir(image_dir) if f.endswith('.jpg')]
  
  with open(dir / 'val2017.txt', 'w') as f:

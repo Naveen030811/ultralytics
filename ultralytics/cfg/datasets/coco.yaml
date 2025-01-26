@@ -105,3 +105,10 @@ download: |
   # Download only val2017 dataset
   urls = ['http://images.cocodataset.org/zips/val2017.zip']  # 1G, 5k images
   download(urls, dir=dir / 'images', threads=1)
+  
+  # Create val2017.txt with image paths
+  images_dir = dir / 'images' / 'val2017'
+  image_paths = [os.path.join('val2017', f) + '\n' for f in os.listdir(images_dir) if f.endswith('.jpg')]
+  
+  with open(dir / 'val2017.txt', 'w') as f:
+      f.writelines(image_paths)

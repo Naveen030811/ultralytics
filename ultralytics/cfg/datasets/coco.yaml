@@ -99,17 +99,13 @@ names:
 download: |
   from ultralytics.utils.downloads import download
   from pathlib import Path
-  import zipfile
 
   dir = Path(yaml['path'])  # dataset root dir
   
   # Download only val2017 dataset
-  url = 'http://images.cocodataset.org/zips/val2017.zip'
-  zip_path = download(url, dir=dir / 'images', threads=1)
-  
-  # Extract zip file
-  with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-      zip_ref.extractall(dir / 'images')
+  download('http://images.cocodataset.org/zips/val2017.zip', 
+            dir=dir / 'images', 
+            unzip=True)
   
   # Create val2017.txt with correct image paths
   images_dir = dir / 'images' / 'val2017'
